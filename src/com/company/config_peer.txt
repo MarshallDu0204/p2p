@@ -1,0 +1,3 @@
+localPort:8000
+fileSharePort:8001
+discoveryPort:8002
