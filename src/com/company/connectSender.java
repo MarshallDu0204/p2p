@@ -11,17 +11,13 @@ public class connectSender {
         portNum = port;
     }
 
-    public void requestConnection(int type,String hostName) throws IOException{
-        String message;
+    public void requestConnection(String hostName) throws IOException{
 
-        if (type==1){
-            message = "requestConnection:Sender";
-        }
-        else{
-            message = "requestConnection:Receiver";
-        }
+        String message = "{{{requestConnection}}}";
 
-        Socket sendSocket = new Socket(hostName,portNum);
+        InetAddress addr = InetAddress.getByName(hostName);
+
+        Socket sendSocket = new Socket(addr,portNum);
 
         DataOutputStream toServer = new DataOutputStream(sendSocket.getOutputStream());
 
@@ -29,27 +25,52 @@ public class connectSender {
 
         toServer.writeBytes(message);
 
+        //add timeout
+
         message = fromServer.readLine();
 
-        if (message.equals("ok")){
-            //set connection
-        }
+        sendSocket.close();
+
+    }
+
+    public String queries(String hostName,String file) throws IOException {
+
+        String query = "query:"+file;
+
+        InetAddress addr = InetAddress.getByName(hostName);
+
+        Socket sendSocket = new Socket(addr, portNum);
+
+        DataOutputStream toServer = new DataOutputStream(sendSocket.getOutputStream());
+
+        BufferedReader fromServer = new BufferedReader(new InputStreamReader(sendSocket.getInputStream()));
+
+        toServer.writeBytes(query);
+
+        //add timeout mechanism to prevent message explode
+
+        String result = fromServer.readLine();
 
         sendSocket.close();
+
+        return result;
+
     }
 
     public void execCheck() throws IOException {
         //timeSlice check the alive
-        checkAlive(host);
+
         //if success, do nothing
         //else do change
     }
 
-    private void checkAlive(String hostName) throws IOException {
+    private boolean checkAlive(String hostName) throws IOException {
 
-        String message = "check:alive";
+        InetAddress addr = InetAddress.getByName(hostName);
 
-        Socket sendSocket = new Socket(hostName,portNum);
+        String message = "{{{check:alive}}}";
+
+        Socket sendSocket = new Socket(addr,portNum);
 
         DataOutputStream toServer = new DataOutputStream(sendSocket.getOutputStream());
 
@@ -59,7 +80,8 @@ public class connectSender {
 
         message = fromServer.readLine();
 
-    }
+        return true;
 
+    }
 
 }

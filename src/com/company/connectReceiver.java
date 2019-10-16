@@ -27,21 +27,32 @@ public class connectReceiver {
 
             message = fromClient.readLine();
 
-            if (message.equals("requestConnection:Sender")){
+            if (message.equals("{{{requestConnection}}}")){
                 //act as the client
-            }
-            else if (message.equals("requestConnection:Receiver")){
-                //act as the server
-            }
-            else{
-                //check alive packet
+                toClient.writeBytes(message);
             }
 
-            toClient.writeBytes(message);
+            else if (message.equals("{{{check:alive}}}")){
+                //act as the server
+                toClient.writeBytes(message);
+            }
+
+            else{
+                String[] query = message.split(":");
+                String fileName = query[1];
+                //if fileName exist, send the query back
+                // else keep flood the query
+                toClient.writeBytes(message);
+
+            }
 
             fromClient.close();
             toClient.close();
             recvSocket.close();
         }
+    }
+
+    public boolean hasFile(String file){
+        return true;
     }
 }

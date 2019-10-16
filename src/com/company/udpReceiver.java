@@ -1,5 +1,6 @@
 package com.company;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -30,7 +31,11 @@ public class udpReceiver {
             InetAddress addr = recvPacket.getAddress();
             int port = recvPacket.getPort();
 
+            sendData = message.getBytes();
 
+            DatagramPacket sendPkt = new DatagramPacket(sendData,sendData.length,addr,port);
+
+            recvSocket.send(sendPkt);
 
         }
 

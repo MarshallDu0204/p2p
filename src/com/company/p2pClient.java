@@ -2,7 +2,7 @@ package com.company;
 import java.io.*;
 
 
-public class p2pClient {
+public class p2pClient implements Runnable{
 
     private static int connectionPort;
 
@@ -42,9 +42,18 @@ public class p2pClient {
         discoverPort = Integer.parseInt(config[2]);
 
     }
+
+    @Override
+    public void run() {
+
+    }
+
+
     public static void main(String[] args) throws IOException {
         p2pClient p2p = new p2pClient();
         p2p.readConfig(configPath);
 
     }
+
+
 }
