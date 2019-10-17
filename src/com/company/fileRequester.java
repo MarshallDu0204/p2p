@@ -6,13 +6,7 @@ import java.net.Socket;
 
 public class fileRequester {
 
-    private static int portNum;
-
-    public fileRequester(int port){
-        portNum = port;
-    }
-
-    public void requestFile(String fileName,String hostName) throws IOException {
+    public void requestFile(String fileName,String hostName,int portNum) throws IOException {
 
         String line;
 
@@ -30,12 +24,16 @@ public class fileRequester {
 
         int i = 0;
 
-        while ((line = fromServer.readLine())!=null){
+        while ((line = fromServer.readLine())!=null){//receive the file and store it
             message[i] = fromServer.readLine();
             i++;
         }
 
         sendSocket.close();
+    }
+
+    public void storeFile(String fileName,String[] message){
+
     }
 
 }

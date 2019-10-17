@@ -31,6 +31,11 @@ public class udpReceiver {
             InetAddress addr = recvPacket.getAddress();
             int port = recvPacket.getPort();
 
+            String[] ping = message.split(":");
+
+            // if connection is full then only flood the query
+            // else return the pong message and flood the query
+
             sendData = message.getBytes();
 
             DatagramPacket sendPkt = new DatagramPacket(sendData,sendData.length,addr,port);

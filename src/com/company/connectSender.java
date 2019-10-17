@@ -4,14 +4,8 @@ import java.io.*;
 
 
 public class connectSender {
-    private static int portNum;
-    private String host;
 
-    public connectSender(int port){
-        portNum = port;
-    }
-
-    public void requestConnection(String hostName) throws IOException{
+    public void requestConnection(String hostName,int portNum) throws IOException{
 
         String message = "{{{requestConnection}}}";
 
@@ -33,7 +27,7 @@ public class connectSender {
 
     }
 
-    public String queries(String hostName,String file) throws IOException {
+    public String queries(String hostName,String file,int portNum) throws IOException {
 
         String query = "query:"+file;
 
@@ -64,7 +58,7 @@ public class connectSender {
         //else do change
     }
 
-    private boolean checkAlive(String hostName) throws IOException {
+    private boolean checkAlive(String hostName,int portNum) throws IOException {
 
         InetAddress addr = InetAddress.getByName(hostName);
 

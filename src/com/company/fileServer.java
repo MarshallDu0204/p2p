@@ -38,7 +38,7 @@ public class fileServer {
                 toClient.writeBytes(message);
             }
 
-            //message = "{{{end}}}+++:end";
+            //message = "{{{end}}}+++:end";   whether to send the end message or let the stream end?
 
             toClient.writeBytes(message);
 
