@@ -1,3 +1,4 @@
-localPort:8000
-fileSharePort:8001
-discoveryPort:8002
+connPort1:52060
+connPort2:52061
+fileSharePort:52062
+discoveryPort:52063

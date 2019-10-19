@@ -28,12 +28,12 @@ public class connectReceiver {
             message = fromClient.readLine();
 
             if (message.equals("{{{requestConnection}}}")){
-                //
+
                 toClient.writeBytes(message);
             }
 
             else if (message.equals("{{{check:alive}}}")){
-                //
+                message = "alive";
                 toClient.writeBytes(message);
             }
 

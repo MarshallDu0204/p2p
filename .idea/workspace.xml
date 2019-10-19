@@ -32,7 +32,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.Main">
+  <component name="RunManager" selected="Application.testThread">
     <configuration name="ChatSocketClient" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.company.ChatSocketClient" />
       <module name="p2p" />
@@ -69,8 +69,22 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="testThread" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.company.testThread" />
+      <module name="p2p" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.company.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.testThread" />
         <item itemvalue="Application.Main" />
         <item itemvalue="Application.ChatSocketClient" />
         <item itemvalue="Application.MultipleServer" />
@@ -106,6 +120,7 @@
       <workItem from="1571265140130" duration="11797000" />
       <workItem from="1571324605424" duration="104000" />
       <workItem from="1571330191549" duration="2241000" />
+      <workItem from="1571414180521" duration="24576000" />
     </task>
     <servers />
   </component>

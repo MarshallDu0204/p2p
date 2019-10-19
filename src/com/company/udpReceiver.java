@@ -6,7 +6,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-public class udpReceiver {
+public class udpReceiver{
     private static int portNum;
 
     public udpReceiver(int port){
@@ -31,10 +31,56 @@ public class udpReceiver {
             InetAddress addr = recvPacket.getAddress();
             int port = recvPacket.getPort();
 
-            String[] ping = message.split(":");
+            String[] temp = message.split(":");
 
-            // if connection is full then only flood the query
-            // else return the pong message and flood the query
+            if(temp[0].equals("PI")){
+                peerController controller = peerController.getController();
+
+                Peer[] connPeer = controller.getConnectedPeer();
+                int cont = controller.getConnNum();
+                String[] ipList = new String[2];
+                int[] portList = new int[2];
+
+                for(int i=0;i<cont;i++){
+                    ipList[i] = connPeer[i].getIp();
+                    portList[i] = connPeer[i].getPortNum();
+                }
+
+                // if connection is full then only flood the query
+                String finalMessage = message;
+                Thread sendThread = new Thread(){
+                  public void run(){
+                      udpSender uSend = new udpSender();
+                      try {
+                          for (int j = 0; j< cont; j++){
+                              uSend.sendMessage(finalMessage,ipList[j],portList[j]);
+                          }
+                          if (cont ==1){
+                              InetAddress localAddr = InetAddress.getLocalHost();
+                              int idlePort = controller.getIdlePort();
+                              if(idlePort!=0){
+                                  String pong = "PO:<"+localAddr+">:<"+idlePort+">";
+                                  String host = new String(String.valueOf(addr));
+                                  uSend.sendMessage(pong,host,port);
+                              }
+                              //send pong message back
+                          }
+                      } catch (IOException e) {
+                          e.printStackTrace();
+                      }
+                  }
+                };
+
+            }
+            else{//recv pong message
+                String ip = temp[1];
+                String portNum = temp[2];
+                ip = ip.substring(1,ip.length()-1);
+                portNum = portNum.substring(1,portNum.length()-1);
+                int portNumInt = Integer.parseInt(portNum);
+                peerController controller = peerController.getController();
+                controller.addPong(ip,portNumInt);
+            }
 
             sendData = message.getBytes();
 
@@ -45,6 +91,5 @@ public class udpReceiver {
         }
 
     }
-
 
 }

@@ -3,13 +3,13 @@ package com.company;
 import java.io.IOException;
 import java.net.*;
 
-public class udpSender {
+public class udpSender{
 
-    public void sendMessage(String discovery,String hostName,int portNum) throws IOException {
+    public void sendMessage(String discovery,String ipAddr,int portNum) throws IOException {
 
         DatagramSocket sendSocket = new DatagramSocket();
 
-        InetAddress addr = InetAddress.getByName(hostName);
+        InetAddress addr = InetAddress.getByName(ipAddr);
 
         byte[] sendData = new byte[1024];
         byte[] recvData = new byte[1024];
@@ -28,4 +28,5 @@ public class udpSender {
 
         sendSocket.close();
     }
+
 }
