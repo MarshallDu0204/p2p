@@ -5,7 +5,7 @@ import java.net.*;
 
 public class udpSender{
 
-    public void sendMessage(String discovery,String ipAddr,int portNum) throws IOException {
+    public void sendMessage(String message,String ipAddr,int portNum) throws IOException {
 
         DatagramSocket sendSocket = new DatagramSocket();
 
@@ -14,7 +14,7 @@ public class udpSender{
         byte[] sendData = new byte[1024];
         byte[] recvData = new byte[1024];
 
-        sendData = discovery.getBytes();
+        sendData = message.getBytes();
 
         DatagramPacket sendPkt = new DatagramPacket(sendData,sendData.length,addr,portNum);
 

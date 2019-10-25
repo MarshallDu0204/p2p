@@ -2,12 +2,15 @@ package com.company;
 import java.net.*;
 import java.io.*;
 
-
 public class connectSender {
 
-    public void requestConnection(String hostName,int portNum) throws IOException{
+    public void requestConnection(String hostName,int portNum,int localPortNum) throws IOException{
 
-        String message = "{{{requestConnection}}}";
+        InetAddress ownIP = InetAddress.getLocalHost();
+
+
+
+        String message = "{{{requestConnection}}}:("+hostName+","+localPortNum+")\n";
 
         InetAddress addr = InetAddress.getByName(hostName);
 
@@ -29,7 +32,7 @@ public class connectSender {
 
     public String queries(String hostName,String file,int portNum) throws IOException {
 
-        String query = "query:"+file;
+        String query = "T:"+file;
 
         InetAddress addr = InetAddress.getByName(hostName);
 
@@ -62,7 +65,7 @@ public class connectSender {
 
         InetAddress addr = InetAddress.getByName(hostName);
 
-        String message = "{{{check:alive}}}";
+        String message = "{{{check}}}:alive\n";
 
         Socket sendSocket = new Socket(addr,portNum);
 

@@ -1,73 +1,122 @@
 package com.company;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 public class peerController {
     private static int pongNum = 0;
     private static int connectNum = 0;
-    private static Peer[] pongPeer = new Peer[30];
-    private static Peer[] connectedPeer = new Peer[2];
-    private static int[] localPort = new int[2];
+    private static Peer[] pongPeer = new Peer[5];
+    private static Peer[] connectedPeer = new Peer[5];
+    private static int[] localPort = new int[5];
+    private static int[] actualPort = new int[5];
+    private static int fPort;
+    private static int uPort;
+    private static int wPort;
+    public static int idNum;
+    public static int queryID;
     private static peerController controller;
 
-    public void addPong(String ip, int portNum){
-        pongPeer[pongNum] = new Peer(ip,portNum);
-        pongNum++;
+    public static boolean pongExist(String ip, int portNum){
+        for(int i=0;i<connectNum;i++){
+            if (pongPeer[i].getIp().equals(ip) && pongPeer[i].getPortNum() == portNum) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    public void addConnect(String ip,int portNum,int selfPort){
-        if(connectNum<2){
+    public static void addPong(String ip, int portNum){
+        if (!pongExist(ip,portNum)) {
+            if (portNum < 5) {
+                pongPeer[pongNum] = new Peer(ip, portNum);
+                pongNum++;
+            }
+        }
+    }
+
+    public static int getWelcomePort(){
+        return wPort;
+    }
+
+    public static int getUdpPort(){
+        return uPort;
+    }
+
+    public static int getFilePort(){
+        return fPort;
+    }
+
+    public static void addConnect(String ip,int portNum,int selfPort){
+        if(connectNum<5){
             connectedPeer[connectNum] = new Peer(ip,portNum);
             localPort[connectNum] = selfPort;
             connectNum++;
         }
     }
 
-    public void removeConnect(int portNum){
-        Peer[] temp = new Peer[2];
-        for(int i=0;i<2;i++){
-            if (connectedPeer[i].getPortNum()!=portNum){
-                temp[0] = connectedPeer[i];
+    public static void removeConnect(int portNum){
+        Peer[] temp = new Peer[5];
+        int[] newLocalPort = new int[5];
+        int k = 0;
+        for(int i=0;i<connectNum;i++){
+            if (connectedPeer[i].getPortNum()!=portNum) {
+                temp[k] = connectedPeer[i];
+                newLocalPort[k] = localPort[i];
+                k++;
             }
         }
+        connectNum--;
         connectedPeer = temp;
     }
 
-    public void clearPong(){
+    public static void clearPong(){
         Peer[] pong = new Peer[30];
         pongPeer = pong;
     }
 
-    public int getConnNum(){
+    public static int getConnNum(){
         return connectNum;
     }
 
-    public int getIdlePort(){
-        if (connectNum == 1){
-            return localPort[1];
+    public static Peer[] selectPeer() {
+        Peer[] getPeer = new Peer[2];
+        for(int i=0;i<2;i++){
+            getPeer[i] = pongPeer[i];
         }
-        else{
-            return 0;
-        }
+        return getPeer;
     }
 
-    public Peer[] getPeer() {
-        Peer[] result = new Peer[2];
-        if (pongNum == 0) {
-            result[0] = pongPeer[0];
-            return result;
-        } else {
-            result[0] = pongPeer[0];
-            result[1] = pongPeer[1];
-            return result;
-        }
-    }
-
-    public Peer[] getConnectedPeer(){
+    public static Peer[] getConnectedPeer(){
         return connectedPeer;
     }
 
-    public static peerController init(){
+    public static int getWPort(){
+        return wPort;
+    }
+
+    public static peerController init(int[] acPort,int welcomePort,int udpPort,int filePort) throws UnknownHostException {
         controller = new peerController();
+        actualPort = acPort;
+        welcomePort = wPort;
+        udpPort = uPort;
+        filePort = fPort;
+
+        InetAddress addr = InetAddress.getLocalHost();
+        String strAddr = addr.getHostName();
+        String[] tempAddr = strAddr.split("-");
+        String tempHash = tempAddr[1];
+
+        idNum = Integer.parseInt(tempHash);
+
+        queryID = idNum*100;
+
         return controller;
+    }
+
+    public static int getQueryID() {
+        queryID++;
+        return queryID-1;
     }
 
     public static peerController getController(){

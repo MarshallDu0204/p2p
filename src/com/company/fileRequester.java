@@ -18,7 +18,9 @@ public class fileRequester {
 
         BufferedReader fromServer = new BufferedReader(new InputStreamReader(sendSocket.getInputStream()));
 
-        toServer.writeBytes(fileName);
+        String queryFile = "T:"+fileName;
+
+        toServer.writeBytes(queryFile);
 
         String[] message = new String[5000];
 
@@ -28,6 +30,8 @@ public class fileRequester {
             message[i] = fromServer.readLine();
             i++;
         }
+
+        storeFile(fileName,message);
 
         sendSocket.close();
     }

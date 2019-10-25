@@ -5,25 +5,23 @@ import java.net.InetAddress;
 
 public class p2pClient{
 
-    private static int connectionPort1;
+    private static int welcomePort;
 
-    private static int connectionPort2;
-
-    private static boolean idlePort1;
-
-    private static boolean idlePort2;
+    private static int[] connectionPortList;
 
     private static int transferPort;
 
     private static int discoverPort;
 
-    public connectSender connSender1;
+    public connectSender welcomeSender;
 
-    public  connectReceiver connReceiver1;
+    public connectSender connSender;
 
-    public connectSender connSender2;
+    public connectSender[] connSenderList;
 
-    public connectReceiver connReceiver2;
+    public  connectReceiver welcomeReceiver;
+
+    public  connectReceiver[] connReceiverList;
 
     public udpSender uSend;
 
@@ -37,9 +35,9 @@ public class p2pClient{
 
     public Thread udpRecv;
 
-    public Thread tcpConn1;
+    public Thread[] tcpConn;
 
-    public Thread tcpConn2;
+    public Thread welcomeRecv;
 
     public Thread fileRecv;
 
@@ -48,10 +46,8 @@ public class p2pClient{
     public void init() throws IOException {
         readConfig("config_peer.txt");
 
-        connSender1 = new connectSender();
-        connReceiver1 = new connectReceiver(connectionPort1);
-        connSender2 = new connectSender();
-        connReceiver2 = new connectReceiver(connectionPort2);
+        welcomeSender = new connectSender();
+        welcomeReceiver = new connectReceiver(welcomePort);
 
         uSend = new udpSender();
         uRecv = new udpReceiver(discoverPort);
@@ -61,10 +57,13 @@ public class p2pClient{
 
         client = new p2pClient();
 
-        controller = peerController.init();
+        int[] tempPortList = new int[5];
 
-        idlePort1 = true;
-        idlePort2 = true;
+        for(int i=0;i<5;i++){
+            tempPortList[i] = discoverPort+i+1;
+        }
+
+        controller = peerController.init(tempPortList,welcomePort,discoverPort,transferPort);
     }
 
     public static p2pClient getClient(){
@@ -90,20 +89,31 @@ public class p2pClient{
             i++;
         }
 
-        for(i=0;i<4;i++){
+        for(i=0;i<3;i++){
             String temp = config[i];
             String[] splitTemp = temp.split(":");
             config[i] = splitTemp[1];
         }
 
-        connectionPort1 =  Integer.parseInt(config[0]);
+        welcomePort =  Integer.parseInt(config[0]);
 
-        connectionPort2 = Integer.parseInt(config[1]);
+        transferPort = Integer.parseInt(config[1]);
 
-        transferPort = Integer.parseInt(config[2]);
+        discoverPort = Integer.parseInt(config[2]);
 
-        discoverPort = Integer.parseInt(config[3]);
+    }
 
+    public void setWelcomeReceiver(){
+        connectReceiver connRecv = new connectReceiver(welcomePort);
+        welcomeRecv = new Thread(){
+          public void run(){
+              try {
+                  connRecv.serveConnect();
+              } catch (IOException e) {
+                  e.printStackTrace();
+              }
+          }
+        };
     }
 
     public void discover(String command) throws IOException {
@@ -131,53 +141,30 @@ public class p2pClient{
 
         InetAddress ownIp = InetAddress.getLocalHost();
 
-        String ping = "PI:<"+ownIp+">:<"+info[2]+">";
+        String ping = "PI:<"+ownIp+">:<"+info[2]+">\n";
 
         uSend.sendMessage(ping, ipAddr,port);
 
         //wait about 2 second for the message
-
-        peerController controller = peerController.getController();
     }
 
     public void setConnection(String ipAddr,int portNum) throws IOException {
-        if (idlePort1){
-            idlePort1 = !idlePort1;
-            tcpConn1 = new Thread(){
-              public void run(){
-                  try {
-                      connReceiver1.serveConnect();
-                  } catch (IOException e) {
-                      e.printStackTrace();
-                  }
-              }
-            };
-            tcpConn1.setPriority(Thread.MAX_PRIORITY);
-            tcpConn1.start();
-            connSender1.requestConnection(ipAddr,portNum);
-
-            controller.addConnect(ipAddr,portNum,connectionPort1);
-
-        }
-        else{
-            if(idlePort2){
-                idlePort2 = !idlePort2;
-                tcpConn2 = new Thread(){
-                  public void run(){
-                      try {
-                          connReceiver2.serveConnect();
-                      } catch (IOException e) {
-                          e.printStackTrace();
-                      }
-                  }
-                };
-                tcpConn2.setPriority(Thread.MAX_PRIORITY);
-                tcpConn2.start();
-                connSender2.requestConnection(ipAddr,portNum);
-
-                controller.addConnect(ipAddr,portNum,connectionPort2);
+        int connPortNum = peerController.getConnNum();
+        connReceiverList[connPortNum] = new connectReceiver(connPortNum+discoverPort+1);
+        tcpConn[connPortNum] = new Thread(){
+            public void run(){
+                try {
+                    connReceiverList[connPortNum].serveConnect();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-        }
+        };
+        tcpConn[connPortNum].setPriority(Thread.MAX_PRIORITY);
+        tcpConn[connPortNum].start();
+        connSender.requestConnection(ipAddr,portNum,connPortNum+discoverPort+1);
+
+        peerController.addConnect(ipAddr,portNum,connPortNum+discoverPort+1);
     }
 
     public void heartBeat(){
