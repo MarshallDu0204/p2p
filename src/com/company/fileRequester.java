@@ -36,8 +36,13 @@ public class fileRequester {
         sendSocket.close();
     }
 
-    public void storeFile(String fileName,String[] message){
-
+    public void storeFile(String fileName,String[] message) throws FileNotFoundException, UnsupportedEncodingException {
+        String path = "obtained/"+fileName;
+        PrintWriter writer = new PrintWriter(path, "UTF-8");
+        for (int i=0;i<message.length;i++){
+            writer.println(message[i]);
+        }
+        writer.close();
     }
 
 }
