@@ -37,16 +37,32 @@ public class connectReceiver {
             String[] tempMessage = message.split(":");
 
             if (tempMessage[0].equals("{{{requestConnection}}}")){
+
                 String[] connInfo = tempMessage[1].split(",");
+
                 String reqHost = connInfo[0];
+
                 reqHost = reqHost.substring(1,reqHost.length());
+
                 String reqPort = connInfo[1];
+
                 reqPort = reqPort.substring(0,reqPort.length()-1);
+
                 int connPort = Integer.parseInt(reqPort);
+
                 p2pClient client = p2pClient.getClient();
+
                 //call the client to set the connection with set of parameters
-                message = "ok\n";
+                int resPort = peerController.getAvaPort();
+
+                message = "ok:"+resPort+"\n";
+
                 toClient.writeBytes(message);
+
+                peerController.addConnect(reqHost,connPort,resPort);
+
+                client.setConnection(reqHost,connPort,resPort);
+
             }
 
             else if (tempMessage[0].equals("{{{check}}}")){
@@ -55,11 +71,52 @@ public class connectReceiver {
             }
 
             else{
-                String[] query = message.split(":");
+                String[] query = tempMessage[1].split(";");
+
+                InetAddress fileAddr = InetAddress.getLocalHost();
+
+                String strAddr = fileAddr.getHostName();
+
+                int filePort = peerController.getFilePort();
+
+                String strID = query[0];
                 String fileName = query[1];
 
-                //if fileName exist, send the query back
-                // else keep flood the query
+                int queryID = Integer.parseInt(strID);
+
+                if(peerController.inQueryList(queryID)){
+                    message = "";
+                }
+                else{
+                    peerController.addQueryNum(queryID);
+
+                    if(peerController.existFile(fileName)){
+                        message = "R:"+queryID+";"+strAddr+":"+filePort+";"+fileName+"\n";
+                    }
+                    else{
+                        Peer[] connPeer = peerController.getConnectedPeer();
+
+                        int cont = peerController.getConnNum();
+
+                        String[] hostList = new String[cont];
+                        int[] portList = new int[cont];
+
+                        for(int i=0;i<cont;i++){
+                            hostList[i] = connPeer[i].getHostName();
+                            portList[i] = peerController.getUdpPort();
+                        }
+
+                        connectSender sender = new connectSender();
+
+                        for (int j = 0; j< cont; j++){
+                            String tempResult = sender.queries(hostList[j],fileName,portList[j],0);
+                            if(tempResult!=null){
+                                message = tempResult;
+                                break;
+                            }
+                        }
+                    }
+                }
                 toClient.writeBytes(message);
             }
 
@@ -69,7 +126,4 @@ public class connectReceiver {
         }
     }
 
-    public boolean hasFile(String file){
-        return true;
-    }
 }

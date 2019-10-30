@@ -40,19 +40,19 @@ public class udpReceiver{
 
                 int cont = peerController.getConnNum();
 
-                String[] ipList = new String[cont];
+                String[] hostList = new String[cont];
                 int[] portList = new int[cont];
 
                 for(int i=0;i<cont;i++){
-                    ipList[i] = connPeer[i].getIp();
+                    hostList[i] = connPeer[i].getHostName();
                     portList[i] = peerController.getUdpPort();
                 }
 
                 udpSender uSend = new udpSender();
 
                 for (int j = 0; j< cont; j++){
-                    if(InetAddress.getByName(ipList[j])!=addr){
-                        uSend.sendMessage(message,ipList[j],portList[j]);
+                    if(!InetAddress.getByName(hostList[j]).equals(addr)){//prevent message back
+                        uSend.sendMessage(message,hostList[j],portList[j]);
                     }
 
                 }

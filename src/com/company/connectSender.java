@@ -8,7 +8,7 @@ public class connectSender {
 
         InetAddress ownIP = InetAddress.getLocalHost();
 
-
+        String tempHost = ownIP.getHostName();
 
         String message = "{{{requestConnection}}}:("+hostName+","+localPortNum+")\n";
 
@@ -22,21 +22,65 @@ public class connectSender {
 
         toServer.writeBytes(message);
 
-        //add timeout
-
         message = fromServer.readLine();
+
+        String[] replyMsg = message.split(":");
+
+        int resPort = Integer.parseInt(replyMsg[1]);
+
+        peerController.addConnect(hostName,portNum,localPortNum);
 
         sendSocket.close();
 
     }
 
-    public String queries(String hostName,String file,int portNum) throws IOException {
+    public String queries(String hostName, String fileName,int portNum,int type) throws IOException {//optional enter the hostName if hostName is null then broadcast msg
 
-        String query = "T:"+file;
+        int queryID = peerController.getQueryID();
+
+        peerController.addQueryNum(queryID);
+
+        String query = "Q:"+queryID+";"+fileName+"\n";
+
+        if (type!=0){
+            Peer[] connPeer = peerController.getConnectedPeer();
+
+            int cont = peerController.getConnNum();
+
+            String[] hostList = new String[cont];
+            int[] portList = new int[cont];
+
+            for(int i=0;i<cont;i++){
+                hostList[i] = connPeer[i].getHostName();
+                portList[i] = peerController.getUdpPort();
+            }
+
+            for (int j = 0; j< cont; j++){
+                String tempResult = queries(hostList[j],fileName,portList[j],0);
+                if(tempResult!=null){
+
+                    String[] info = tempResult.split(":");
+                    String[] tempAddr = info[1].split(";");
+                    String[] tempPort = info[2].split(";");
+
+                    String destAddr = tempAddr[1];
+                    String strPort = tempPort[0];
+                    int destPort = Integer.parseInt(strPort);
+
+                    fileRequester fileReq = new fileRequester();
+
+                    fileReq.requestFile(fileName,destAddr,destPort);
+
+                    break;
+                }
+            }
+            return null;
+
+        }
 
         InetAddress addr = InetAddress.getByName(hostName);
 
-        Socket sendSocket = new Socket(addr, portNum);
+        Socket sendSocket = new Socket(addr,portNum);
 
         DataOutputStream toServer = new DataOutputStream(sendSocket.getOutputStream());
 
@@ -44,24 +88,14 @@ public class connectSender {
 
         toServer.writeBytes(query);
 
-        //add timeout mechanism to prevent message explode
-
         String result = fromServer.readLine();
 
         sendSocket.close();
 
         return result;
-
     }
 
-    public void execCheck() throws IOException {
-        //timeSlice check the alive
-
-        //if success, do nothing
-        //else do change
-    }
-
-    private boolean checkAlive(String hostName,int portNum) throws IOException {
+    public boolean checkAlive(String hostName,int portNum) throws IOException {
 
         InetAddress addr = InetAddress.getByName(hostName);
 

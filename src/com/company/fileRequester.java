@@ -18,11 +18,11 @@ public class fileRequester {
 
         BufferedReader fromServer = new BufferedReader(new InputStreamReader(sendSocket.getInputStream()));
 
-        String queryFile = "T:"+fileName;
+        String queryFile = "T:"+fileName+"\n";
 
         toServer.writeBytes(queryFile);
 
-        String[] message = new String[5000];
+        String[] message = new String[70000];
 
         int i = 0;
 

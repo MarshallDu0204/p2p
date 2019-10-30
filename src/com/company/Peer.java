@@ -1,16 +1,16 @@
 package com.company;
 
 public class Peer {
-    private String ipAddr;
+    private String hostName;
     private int portNum;
 
-    public Peer(String addr, int port){
-        ipAddr = addr;
+    public Peer(String hostAddr, int port){
+        hostName = hostAddr;
         portNum = port;
     }
 
-    public String getIp(){
-        return ipAddr;
+    public String getHostName(){
+        return hostName;
     }
 
     public int getPortNum(){

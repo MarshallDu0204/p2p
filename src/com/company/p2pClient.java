@@ -1,13 +1,12 @@
 package com.company;
 import java.io.*;
 import java.net.InetAddress;
+import java.util.Scanner;
 
 
 public class p2pClient{
 
     private static int welcomePort;
-
-    private static int[] connectionPortList;
 
     private static int transferPort;
 
@@ -16,8 +15,6 @@ public class p2pClient{
     public connectSender welcomeSender;
 
     public connectSender connSender;
-
-    public connectSender[] connSenderList;
 
     public  connectReceiver welcomeReceiver;
 
@@ -31,15 +28,18 @@ public class p2pClient{
 
     public fileServer fileServ;
 
-    public peerController controller;
+    public static peerController controller;
 
     public Thread udpRecv;
 
     public Thread[] tcpConn;
 
+    public Thread[] heartBeatThread;
+
     public Thread welcomeRecv;
 
-    public Thread fileRecv;
+    public Thread serveFile;
+
 
     private static p2pClient client;
 
@@ -53,6 +53,7 @@ public class p2pClient{
         uRecv = new udpReceiver(discoverPort);
 
         fileReq = new fileRequester();
+
         fileServ = new fileServer(transferPort);
 
         client = new p2pClient();
@@ -63,7 +64,17 @@ public class p2pClient{
             tempPortList[i] = discoverPort+i+1;
         }
 
+        tcpConn = new Thread[5];
+
+        heartBeatThread = new Thread[5];
+
+        connReceiverList = new connectReceiver[5];
+
         controller = peerController.init(tempPortList,welcomePort,discoverPort,transferPort);
+
+        setWelcomeReceiver();
+
+        setFileServer();
     }
 
     public static p2pClient getClient(){
@@ -71,10 +82,32 @@ public class p2pClient{
     }
 
 
-    private void command(String command){
+    private void command() throws IOException {
+         while (true){
+             Scanner input = new Scanner(System.in);
+             if (input.hasNext()){
+                 String order = input.next();
+                 String[] tempInfo = order.split("<");
+                 if(tempInfo.length>1){
+                     if(tempInfo[0].equals("Connect")){
+                         discover(order);
+                     }
+                     else if(tempInfo[0].equals("Get")){
+                         String fileName = tempInfo[1].substring(0,tempInfo[1].length()-1);
+                         query(fileName);
+                     }
+                 }
+                 else{
+                     if(order.equals("Leave")){
 
+                     }
+                     else if(order.equals("Exit")){
+
+                     }
+                 }
+             }
+         }
     }
-
 
     private void readConfig(String path) throws IOException {
         File file = new File(path);
@@ -104,17 +137,31 @@ public class p2pClient{
     }
 
     public void setWelcomeReceiver(){
-        connectReceiver connRecv = new connectReceiver(welcomePort);
         welcomeRecv = new Thread(){
           public void run(){
               try {
-                  connRecv.serveConnect();
+                  welcomeReceiver.serveConnect();
               } catch (IOException e) {
                   e.printStackTrace();
               }
           }
         };
     }
+
+    public void setFileServer(){
+        serveFile = new Thread(){
+          public void run(){
+              try {
+                  fileServ.serveFile();
+              } catch (IOException e) {
+                  e.printStackTrace();
+              }
+          }
+        };
+
+    }
+
+
 
     public void discover(String command) throws IOException {
         String[] info = command.split("<");
@@ -145,39 +192,85 @@ public class p2pClient{
 
         uSend.sendMessage(ping, ipAddr,port);
 
-        //wait about 2 second for the message
+        Thread tempSleep = new Thread(){
+          public void run(){
+              try {
+                  Thread.sleep(1000);
+                   Peer[] pong = peerController.getPongMsg();
+                   if(pong[1].getPortNum()==0){
+                       int localPort = peerController.getAvaPort();
+                       String destIP = pong[0].getHostName();
+                       int destPort = pong[0].getPortNum();
+                       setConnection(destIP,destPort,localPort);
+                   }
+                   else{
+                       int localPort = peerController.getAvaPort();
+                       String destIP = pong[0].getHostName();
+                       int destPort = pong[0].getPortNum();
+                       setConnection(destIP,destPort,localPort);
+                       int localPort1 = peerController.getAvaPort();
+                       String destIP1 = pong[1].getHostName();
+                       int destPort1 = pong[1].getPortNum();
+                       setConnection(destIP1,destPort1,localPort1);
+                   }
+              } catch (InterruptedException | IOException e) {
+                  e.printStackTrace();
+              }
+          }
+        };
     }
 
-    public void setConnection(String ipAddr,int portNum) throws IOException {
-        int connPortNum = peerController.getConnNum();
-        connReceiverList[connPortNum] = new connectReceiver(connPortNum+discoverPort+1);
-        tcpConn[connPortNum] = new Thread(){
+    public void setConnection(String hostName,int portNum,int localPort) throws IOException {
+        int avaThread = peerController.getAvaThread();
+        connReceiverList[avaThread] = new connectReceiver(localPort);
+        tcpConn[avaThread] = new Thread(){
             public void run(){
                 try {
-                    connReceiverList[connPortNum].serveConnect();
+                    connReceiverList[avaThread].serveConnect();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         };
-        tcpConn[connPortNum].setPriority(Thread.MAX_PRIORITY);
-        tcpConn[connPortNum].start();
-        connSender.requestConnection(ipAddr,portNum,connPortNum+discoverPort+1);
-
-        peerController.addConnect(ipAddr,portNum,connPortNum+discoverPort+1);
+        tcpConn[avaThread].setPriority(Thread.MAX_PRIORITY);
+        tcpConn[avaThread].start();
+        peerController.addThread(localPort,avaThread);
+        heartBeat(hostName,portNum,avaThread);
     }
 
-    public void heartBeat(){
-
+    public void heartBeat(String hostName,int portNum,int tagNum){
+        heartBeatThread[tagNum] = new Thread(){
+            public void run(){
+                try {
+                    while (true) {
+                        Thread.sleep(20000);
+                        boolean isConnect = connSender.checkAlive(hostName, portNum);
+                        if (!isConnect) {
+                            int threadNum = peerController.getThreadNum(portNum);
+                            tcpConn[threadNum].interrupt();
+                            connReceiverList[threadNum] = null;
+                            peerController.removeConnect(portNum);
+                            peerController.removeThread(portNum);
+                            Thread.interrupted();
+                        }
+                    }
+                } catch (InterruptedException | IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        heartBeatThread[tagNum].setPriority(Thread.MAX_PRIORITY);
+        heartBeatThread[tagNum].start();
     }
 
-    public void query(){
-
+    public void query(String fileName) throws IOException {
+        connSender.queries("",fileName,0,1);
     }
 
     public static void main(String[] args) throws IOException {
         p2pClient p2p = new p2pClient();
         p2p.init();
+        p2p.command();
     }
 
 

@@ -31,14 +31,14 @@ public class fileServer {
 
             String fileName = fileMsg[1];
 
+            fileName = "shared/"+fileName;
+
             BufferedReader file = new BufferedReader(new FileReader(fileName));
 
             while ((line = file.readLine())!=null){
                 message = file.readLine();
                 toClient.writeBytes(message);
             }
-
-            //message = "{{{end}}}+++:end";   whether to send the end message or let the stream end?
 
             toClient.writeBytes(message);
 

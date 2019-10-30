@@ -19,6 +19,7 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -32,7 +33,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.testThread">
+  <component name="RunManager" selected="Application.Main">
     <configuration name="ChatSocketClient" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="com.company.ChatSocketClient" />
       <module name="p2p" />
@@ -70,6 +71,8 @@
       </method>
     </configuration>
     <configuration name="testThread" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="ALTERNATIVE_JRE_PATH" value="C:/Program Files/Java/jre1.8.0_231" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="com.company.testThread" />
       <module name="p2p" />
       <extension name="coverage">
@@ -82,6 +85,12 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="Application.ChatSocketClient" />
+      <item itemvalue="Application.Main" />
+      <item itemvalue="Application.MultipleServer" />
+      <item itemvalue="Application.testThread" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Application.testThread" />
@@ -133,6 +142,8 @@
       <workItem from="1572100280085" duration="127000" />
       <workItem from="1572134236275" duration="6000" />
       <workItem from="1572156273868" duration="994000" />
+      <workItem from="1572194478844" duration="5125000" />
+      <workItem from="1572203803944" duration="133000" />
     </task>
     <servers />
   </component>
