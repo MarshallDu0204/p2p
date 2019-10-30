@@ -12,8 +12,6 @@ public class p2pClient{
 
     private static int discoverPort;
 
-    public connectSender welcomeSender;
-
     public connectSender connSender;
 
     public  connectReceiver welcomeReceiver;
@@ -46,7 +44,6 @@ public class p2pClient{
     public void init() throws IOException {
         readConfig("config_peer.txt");
 
-        welcomeSender = new connectSender();
         welcomeReceiver = new connectReceiver(welcomePort);
 
         uSend = new udpSender();
@@ -221,7 +218,7 @@ public class p2pClient{
     }
 
     public void setConnection(String hostName,int portNum,int localPort) throws IOException {
-        int avaThread = peerController.getAvaThread();
+        final int avaThread = peerController.getAvaThread();
         connReceiverList[avaThread] = new connectReceiver(localPort);
         tcpConn[avaThread] = new Thread(){
             public void run(){
@@ -239,18 +236,20 @@ public class p2pClient{
     }
 
     public void heartBeat(String hostName,int portNum,int tagNum){
+        final String tempHostName = hostName;
+        final int tempPortNum = portNum;
         heartBeatThread[tagNum] = new Thread(){
             public void run(){
                 try {
                     while (true) {
                         Thread.sleep(20000);
-                        boolean isConnect = connSender.checkAlive(hostName, portNum);
+                        boolean isConnect = connSender.checkAlive(tempHostName, tempPortNum);
                         if (!isConnect) {
-                            int threadNum = peerController.getThreadNum(portNum);
+                            int threadNum = peerController.getThreadNum(tempPortNum);
                             tcpConn[threadNum].interrupt();
                             connReceiverList[threadNum] = null;
-                            peerController.removeConnect(portNum);
-                            peerController.removeThread(portNum);
+                            peerController.removeConnect(tempPortNum);
+                            peerController.removeThread(tempPortNum);
                             Thread.interrupted();
                         }
                     }
