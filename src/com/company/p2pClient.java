@@ -72,6 +72,8 @@ public class p2pClient{
         setWelcomeReceiver();
 
         setFileServer();
+
+        setUdpReceiver();
     }
 
     public static p2pClient getClient(){
@@ -158,18 +160,7 @@ public class p2pClient{
 
     }
 
-
-
-    public void discover(String command) throws IOException {
-        String[] info = command.split("<");
-        String ipAddr = info[1];
-        String portNum = info[2];
-
-        ipAddr = ipAddr.substring(0,ipAddr.length()-1);
-        portNum = portNum.substring(0,portNum.length()-1);
-
-        int port = Integer.parseInt(portNum);
-
+    public void setUdpReceiver(){
         udpRecv = new Thread(){
             public void run(){
                 try {
@@ -181,7 +172,19 @@ public class p2pClient{
         };
         udpRecv.setPriority(Thread.MAX_PRIORITY);
         udpRecv.start();
-        //create a thread to open the receiver to receive the message
+    }
+
+
+
+    public void discover(String command) throws IOException {
+        String[] info = command.split("<");
+        String ipAddr = info[1];
+        String portNum = info[2];
+
+        ipAddr = ipAddr.substring(0,ipAddr.length()-1);
+        portNum = portNum.substring(0,portNum.length()-1);
+
+        int port = Integer.parseInt(portNum);
 
         InetAddress ownIp = InetAddress.getLocalHost();
 
