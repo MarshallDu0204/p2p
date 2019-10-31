@@ -1,4 +1,3 @@
-package com.company;
 
 import javax.xml.crypto.Data;
 import java.io.IOException;

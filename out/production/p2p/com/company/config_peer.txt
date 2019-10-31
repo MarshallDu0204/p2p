@@ -1,3 +1,0 @@
-connPort:52060
-fileSharePort:52061
-discoveryPort:52062
