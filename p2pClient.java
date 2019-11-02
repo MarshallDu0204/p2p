@@ -210,24 +210,21 @@ public class p2pClient{
                        if(pong[1]==null){
                            int localPort = peerController.getAvaPort();
                            String tempIp = pong[0].getHostName();
-                           String[] destIP = tempIp.split("/");
                            int destPort = pong[0].getPortNum();
-                           connSender.requestConnection(destIP[1], destPort,localPort);
-                           setConnection(destIP[1],destPort,localPort);
+                           connSender.requestConnection(tempIp, destPort,localPort);
+                           setConnection(tempIp,destPort,localPort);
                        }
                        else{
                            int localPort = peerController.getAvaPort();
                            String tempIp = pong[0].getHostName();
-                           String[] destIP = tempIp.split("/");
                            int destPort = pong[0].getPortNum();
-                           int resport = connSender.requestConnection(destIP[1], destPort,localPort);
-                           setConnection(destIP[1],resport,localPort);
+                           int resport = connSender.requestConnection(tempIp, destPort,localPort);
+                           setConnection(tempIp,resport,localPort);
                            int localPort1 = peerController.getAvaPort();
                            String tempIp1  = pong[1].getHostName();
-                           String[] destIP1 = tempIp1.split("/");
                            int destPort1 = pong[1].getPortNum();
-                           connSender.requestConnection(destIP1[1], destPort1,localPort1);
-                           setConnection(destIP1[1],destPort1,localPort1);
+                           connSender.requestConnection(tempIp1, destPort1,localPort1);
+                           setConnection(tempIp1,destPort1,localPort1);
                        }
                    }
 
