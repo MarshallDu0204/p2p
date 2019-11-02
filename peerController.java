@@ -1,5 +1,4 @@
 
-
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -21,6 +20,7 @@ public class peerController {
     private static int wPort;
     public static int idNum;
     public static int queryID;
+    public static String peerAddr;
     private static peerController controller;
 
     public static boolean pongExist(String hostName, int portNum){
@@ -30,6 +30,23 @@ public class peerController {
             }
         }
         return false;
+    }
+
+    public static String getPeerAddr(){
+        return peerAddr;
+    }
+
+    public static void derivePeerAddr() throws UnknownHostException {
+        InetAddress tempAddr = InetAddress.getLocalHost();
+        String newAddr = new String(String.valueOf(tempAddr));
+        String[] tempStr = newAddr.split("/");
+        String host = tempStr[0];
+        host = host+".case.edu";
+        InetAddress finalAddr = InetAddress.getByName(host);
+        String resultAddr = new String(String.valueOf(finalAddr));
+        String[] result = resultAddr.split("/");
+
+        peerAddr = result[1];
     }
 
     public static void addPong(String hostName, int portNum){
@@ -125,6 +142,8 @@ public class peerController {
         wPort = welcomePort;
         uPort = udpPort;
         fPort = filePort;
+
+        derivePeerAddr();
 
         InetAddress addr = InetAddress.getLocalHost();
         String strAddr = addr.getHostName();

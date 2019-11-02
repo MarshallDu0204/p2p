@@ -194,7 +194,9 @@ public class p2pClient{
 
         InetAddress ownIp = InetAddress.getLocalHost();
 
-        String ping = "PI:<"+ownIp+">:<"+info[2]+">\n";
+        String acHost = peerController.getPeerAddr();
+
+        String ping = "PI:<"+acHost+">:<"+info[2]+">\n";
 
         uSend.sendMessage(ping, ipAddr,port);
 

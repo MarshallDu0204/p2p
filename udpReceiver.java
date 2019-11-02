@@ -57,40 +57,38 @@ public class udpReceiver{
                     }
                 }
 
-                InetAddress localAddr = InetAddress.getLocalHost();
+                //InetAddress localAddr = InetAddress.getLocalHost();
 
-                String strAddr = localAddr.getHostName();
-
-                String pureAddr = strAddr.substring(1,strAddr.length());
+                String strAddr = peerController.getPeerAddr();
 
                 int welcomePort = peerController.getWelcomePort();
 
-                String pong = "PO:<"+localAddr+">:<"+welcomePort+">\n";
+                String pong = "PO:<"+strAddr+">:<"+welcomePort+">\n";
 
-                strAddr = new String(String.valueOf(getAddr));
+                strAddr = temp[1].substring(1,temp[1].length()-1);
 
-                pureAddr = strAddr.substring(1,strAddr.length());
+                System.out.println("pingAddr"+strAddr);
 
-                uSend.sendMessage(pong,pureAddr,portNum);
+                uSend.sendMessage(pong,strAddr,portNum);
 
                 //send pong message back
             }
             else{//recv pong message
+
                 String ip = temp[1];
+
                 String portNumRecv = temp[2];
+
                 ip = ip.substring(1,ip.length()-1);
+
                 portNumRecv = portNumRecv.substring(1,6);
+
                 int portNumInt = Integer.parseInt(portNumRecv);
+
                 peerController controller = peerController.getController();
+
                 peerController.addPong(ip,portNumInt);
             }
-
-            //sendData = message.getBytes();
-
-            //DatagramPacket sendPkt = new DatagramPacket(sendData,sendData.length,getAddr,port);
-
-            //recvSocket.send(sendPkt);
-
         }
 
     }

@@ -12,9 +12,11 @@ public class connectSender {
 
         String[] destHost = tempHost.split("/");
 
+        String acHost = peerController.getPeerAddr();
+
         System.out.println(tempHost);
 
-        String message = "{{{requestConnection}}}:("+destHost[1]+","+localPortNum+")\n";
+        String message = "{{{requestConnection}}}:("+acHost+","+localPortNum+")\n";
 
         InetAddress addr = InetAddress.getByName(hostName);
 

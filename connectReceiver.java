@@ -78,6 +78,8 @@ public class connectReceiver {
 
                 String[] actuAddr = tempAddr.split("/");
 
+                String acHost = peerController.getPeerAddr();
+
                 int filePort = peerController.getFilePort();
 
                 String strID = query[0];
@@ -94,7 +96,7 @@ public class connectReceiver {
                     peerController.addQueryNum(queryID);
 
                     if(peerController.existFile(fileName)){
-                        message = "R:"+queryID+";"+actuAddr[1]+":"+filePort+";"+fileName+"\n";
+                        message = "R:"+queryID+";"+acHost+":"+filePort+";"+fileName+"\n";
 
                         toClient.writeBytes(message);
                     }
