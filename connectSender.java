@@ -1,15 +1,20 @@
+
 import java.net.*;
 import java.io.*;
 
 public class connectSender {
 
-    public void requestConnection(String hostName,int portNum,int localPortNum) throws IOException{
+    public int requestConnection(String hostName,int portNum,int localPortNum) throws IOException{
 
         InetAddress ownIP = InetAddress.getLocalHost();
 
-        String tempHost = ownIP.getHostName();
+        String tempHost = String.valueOf(ownIP);
 
-        String message = "{{{requestConnection}}}:("+hostName+","+localPortNum+")\n";
+        String[] destHost = tempHost.split("/");
+
+        System.out.println(tempHost);
+
+        String message = "{{{requestConnection}}}:("+destHost[1]+","+localPortNum+")\n";
 
         InetAddress addr = InetAddress.getByName(hostName);
 
@@ -27,9 +32,11 @@ public class connectSender {
 
         int resPort = Integer.parseInt(replyMsg[1]);
 
-        peerController.addConnect(hostName,portNum,localPortNum);
+        peerController.addConnect(hostName,resPort,localPortNum);
 
         sendSocket.close();
+
+        return resPort;
 
     }
 
@@ -51,13 +58,12 @@ public class connectSender {
 
             for(int i=0;i<cont;i++){
                 hostList[i] = connPeer[i].getHostName();
-                portList[i] = peerController.getUdpPort();
+                portList[i] = connPeer[i].getPortNum();
             }
 
             for (int j = 0; j< cont; j++){
                 String tempResult = queries(hostList[j],fileName,portList[j],0);
                 if(tempResult!=null){
-
                     String[] info = tempResult.split(":");
                     String[] tempAddr = info[1].split(";");
                     String[] tempPort = info[2].split(";");
@@ -74,7 +80,6 @@ public class connectSender {
                 }
             }
             return null;
-
         }
 
         InetAddress addr = InetAddress.getByName(hostName);

@@ -1,4 +1,5 @@
 
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -32,14 +33,19 @@ public class fileServer {
 
             fileName = "shared/"+fileName;
 
-            BufferedReader file = new BufferedReader(new FileReader(fileName));
+            File file = new File(fileName);
 
-            while ((line = file.readLine())!=null){
-                message = file.readLine();
-                toClient.writeBytes(message);
+            byte[] bytes = new byte[1024];
+
+            int length = 0;
+
+            FileInputStream fileInputStream = new FileInputStream(file);
+
+            while ((length = fileInputStream.read(bytes,0,bytes.length))!=-1){
+                toClient.write(bytes,0,length);
+                toClient.flush();
             }
 
-            toClient.writeBytes(message);
 
             fromClient.close();
             toClient.close();

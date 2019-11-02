@@ -1,4 +1,5 @@
 
+
 import java.io.IOException;
 import java.net.*;
 
@@ -18,12 +19,6 @@ public class udpSender{
         DatagramPacket sendPkt = new DatagramPacket(sendData,sendData.length,addr,portNum);
 
         sendSocket.send(sendPkt);
-
-        DatagramPacket recvPkt = new DatagramPacket(recvData,recvData.length);
-
-        sendSocket.receive(recvPkt);
-
-        String replyMsg =  new String(recvPkt.getData());
 
         sendSocket.close();
     }

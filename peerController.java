@@ -14,6 +14,7 @@ public class peerController {
     private static int[] localPort = new int[5];
     private static int[] actualPort = new int[5];
     private static String[] fileList = new String[50];
+    private static int fileNum = 0;
     private static int[] accordance = new int[5];
     private static int fPort;
     private static int uPort;
@@ -23,7 +24,7 @@ public class peerController {
     private static peerController controller;
 
     public static boolean pongExist(String hostName, int portNum){
-        for(int i=0;i<connectNum;i++){
+        for(int i=0;i<pongNum;i++){
             if (pongPeer[i].getHostName().equals(hostName) && pongPeer[i].getPortNum() == portNum) {
                 return true;
             }
@@ -33,7 +34,7 @@ public class peerController {
 
     public static void addPong(String hostName, int portNum){
         if (!pongExist(hostName,portNum)) {
-            if (portNum < 5) {
+            if (pongNum < 5) {
                 pongPeer[pongNum] = new Peer(hostName, portNum);
                 pongNum++;
             }
@@ -42,10 +43,10 @@ public class peerController {
 
     public static Peer[] getPongMsg(){
         Peer[] peers = new Peer[2];
-        if(pongPeer[0].getPortNum()==0){
+        if(pongPeer[0]==null){
             return null;
         }
-        else if(pongPeer[1].getPortNum()==0){
+        else if(pongPeer[1]==null){
             peers[0] = pongPeer[0];
             return peers;
         }
@@ -92,8 +93,9 @@ public class peerController {
     }
 
     public static void clearPong(){
-        Peer[] pong = new Peer[30];
+        Peer[] pong = new Peer[5];
         pongPeer = pong;
+        pongNum = 0;
     }
 
     public static int getConnNum(){
@@ -112,9 +114,6 @@ public class peerController {
         return connectedPeer;
     }
 
-    public static int getWPort(){
-        return wPort;
-    }
 
     public static int getAvaPort(){
         return actualPort[connectNum];
@@ -123,9 +122,9 @@ public class peerController {
     public static peerController init(int[] acPort,int welcomePort,int udpPort,int filePort) throws UnknownHostException {
         controller = new peerController();
         actualPort = acPort;
-        welcomePort = wPort;
-        udpPort = uPort;
-        filePort = fPort;
+        wPort = welcomePort;
+        uPort = udpPort;
+        fPort = filePort;
 
         InetAddress addr = InetAddress.getLocalHost();
         String strAddr = addr.getHostName();
@@ -136,7 +135,7 @@ public class peerController {
 
         queryID = idNum*100;
 
-        readDir("obtained/");
+        readDir("shared/");
 
         return controller;
     }
@@ -175,10 +174,12 @@ public class peerController {
 
         for (int i = 0; i<tempList.length; i++){
             if(tempList[i].isFile()){
-                String[] tempName = tempList[i].getName().split("/");
-                fileList[i] = tempName[1];
+                String tempName = tempList[i].getName();
+                fileList[i] = tempName;
             }
         }
+
+        fileNum = tempList.length;
     }
 
     public static int getAvaThread(){
@@ -215,7 +216,7 @@ public class peerController {
 
     public static boolean existFile(String fileName){
         boolean exist = false;
-        for(int i=0;i<fileList.length;i++){
+        for(int i=0;i<fileNum;i++){
             if (fileList[i].equals(fileName)){
                 exist = true;
             }

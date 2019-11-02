@@ -1,4 +1,5 @@
 
+
 import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -61,7 +62,6 @@ public class connectReceiver {
                 peerController.addConnect(reqHost,connPort,resPort);
 
                 client.setConnection(reqHost,connPort,resPort);
-
             }
 
             else if (tempMessage[0].equals("{{{check}}}")){
@@ -74,7 +74,9 @@ public class connectReceiver {
 
                 InetAddress fileAddr = InetAddress.getLocalHost();
 
-                String strAddr = fileAddr.getHostName();
+                String tempAddr = new String(String.valueOf(fileAddr));
+
+                String[] actuAddr = tempAddr.split("/");
 
                 int filePort = peerController.getFilePort();
 
@@ -85,14 +87,22 @@ public class connectReceiver {
 
                 if(peerController.inQueryList(queryID)){
                     message = "";
+
+                    toClient.writeBytes(message);
                 }
                 else{
                     peerController.addQueryNum(queryID);
 
                     if(peerController.existFile(fileName)){
-                        message = "R:"+queryID+";"+strAddr+":"+filePort+";"+fileName+"\n";
+                        message = "R:"+queryID+";"+actuAddr[1]+":"+filePort+";"+fileName+"\n";
+
+                        toClient.writeBytes(message);
                     }
                     else{
+                        message = "";
+
+                        toClient.writeBytes(message);
+
                         Peer[] connPeer = peerController.getConnectedPeer();
 
                         int cont = peerController.getConnNum();
@@ -102,7 +112,7 @@ public class connectReceiver {
 
                         for(int i=0;i<cont;i++){
                             hostList[i] = connPeer[i].getHostName();
-                            portList[i] = peerController.getUdpPort();
+                            portList[i] = connPeer[i].getPortNum();
                         }
 
                         connectSender sender = new connectSender();
@@ -116,7 +126,7 @@ public class connectReceiver {
                         }
                     }
                 }
-                toClient.writeBytes(message);
+
             }
 
             fromClient.close();

@@ -15,33 +15,34 @@ public class fileRequester {
 
         DataOutputStream toServer = new DataOutputStream(sendSocket.getOutputStream());
 
-        BufferedReader fromServer = new BufferedReader(new InputStreamReader(sendSocket.getInputStream()));
+        DataInputStream fromServer = new DataInputStream(sendSocket.getInputStream());
+
 
         String queryFile = "T:"+fileName+"\n";
 
         toServer.writeBytes(queryFile);
 
-        String[] message = new String[70000];
+        fileName = "obtained/"+fileName;
 
-        int i = 0;
+        File file = new File(fileName);
 
-        while ((line = fromServer.readLine())!=null){//receive the file and store it
-            message[i] = fromServer.readLine();
-            i++;
+        if(file.exists()){
+            file.delete();
+        }
+        else {
+            file.createNewFile();
         }
 
-        storeFile(fileName,message);
+        FileOutputStream fileOutputStream = new FileOutputStream(file);
+
+        byte[] bytes = new byte[1024];
+        int num = 0;
+        while ((num = fromServer.read(bytes,0,bytes.length))!=-1){
+            fileOutputStream.write(bytes,0,num);
+            fileOutputStream.flush();
+        }
 
         sendSocket.close();
-    }
-
-    public void storeFile(String fileName,String[] message) throws FileNotFoundException, UnsupportedEncodingException {
-        String path = "obtained/"+fileName;
-        PrintWriter writer = new PrintWriter(path, "UTF-8");
-        for (int i=0;i<message.length;i++){
-            writer.println(message[i]);
-        }
-        writer.close();
     }
 
 }

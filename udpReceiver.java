@@ -1,5 +1,5 @@
 
-import javax.xml.crypto.Data;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -27,7 +27,7 @@ public class udpReceiver{
 
             message = new String(recvPacket.getData());
 
-            InetAddress addr = recvPacket.getAddress();
+            InetAddress getAddr = recvPacket.getAddress();
             int port = recvPacket.getPort();
 
             String[] temp = message.split(":");
@@ -35,50 +35,61 @@ public class udpReceiver{
             if(temp[0].equals("PI")){
                 peerController controller = peerController.getController();
 
+                udpSender uSend = new udpSender();
+
                 Peer[] connPeer = peerController.getConnectedPeer();
 
                 int cont = peerController.getConnNum();
 
-                String[] hostList = new String[cont];
-                int[] portList = new int[cont];
+                if(cont>0){
+                    String[] hostList = new String[cont];
+                    int[] portList = new int[cont];
 
-                for(int i=0;i<cont;i++){
-                    hostList[i] = connPeer[i].getHostName();
-                    portList[i] = peerController.getUdpPort();
-                }
-
-                udpSender uSend = new udpSender();
-
-                for (int j = 0; j< cont; j++){
-                    if(!InetAddress.getByName(hostList[j]).equals(addr)){//prevent message back
-                        uSend.sendMessage(message,hostList[j],portList[j]);
+                    for(int i=0;i<cont;i++){
+                        hostList[i] = connPeer[i].getHostName();
+                        portList[i] = peerController.getUdpPort();
                     }
 
+                    for (int j = 0; j< cont; j++){
+                        if(!InetAddress.getByName(hostList[j]).equals(getAddr)){//prevent message back
+                            uSend.sendMessage(message,hostList[j],portList[j]);
+                        }
+                    }
                 }
+
                 InetAddress localAddr = InetAddress.getLocalHost();
-                int welcomePort = peerController.getWPort();
+
+                String strAddr = localAddr.getHostName();
+
+                String pureAddr = strAddr.substring(1,strAddr.length());
+
+                int welcomePort = peerController.getWelcomePort();
 
                 String pong = "PO:<"+localAddr+">:<"+welcomePort+">\n";
-                String host = new String(String.valueOf(addr));
-                uSend.sendMessage(pong,host,peerController.getUdpPort());
+
+                strAddr = new String(String.valueOf(getAddr));
+
+                pureAddr = strAddr.substring(1,strAddr.length());
+
+                uSend.sendMessage(pong,pureAddr,portNum);
 
                 //send pong message back
             }
             else{//recv pong message
                 String ip = temp[1];
-                String portNum = temp[2];
+                String portNumRecv = temp[2];
                 ip = ip.substring(1,ip.length()-1);
-                portNum = portNum.substring(1,portNum.length()-1);
-                int portNumInt = Integer.parseInt(portNum);
+                portNumRecv = portNumRecv.substring(1,6);
+                int portNumInt = Integer.parseInt(portNumRecv);
                 peerController controller = peerController.getController();
                 peerController.addPong(ip,portNumInt);
             }
 
-            sendData = message.getBytes();
+            //sendData = message.getBytes();
 
-            DatagramPacket sendPkt = new DatagramPacket(sendData,sendData.length,addr,port);
+            //DatagramPacket sendPkt = new DatagramPacket(sendData,sendData.length,getAddr,port);
 
-            recvSocket.send(sendPkt);
+            //recvSocket.send(sendPkt);
 
         }
 
