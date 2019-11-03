@@ -291,7 +291,7 @@ public class p2pClient{
                             isConnect = connSender.checkAlive(tempHostName, tempPortNum);
                         }catch (IOException e){
                             isConnect=false;
-                            System.out.println("Connect false to "+hostName);
+                            System.out.println("Connect false to "+tempHostName);
                         }
                         if (!isConnect) {
                             int threadNum = peerController.getThreadNum(tempPortNum);
