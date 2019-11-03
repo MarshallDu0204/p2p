@@ -1,4 +1,5 @@
 
+
 import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -8,6 +9,8 @@ public class fileRequester {
     public void requestFile(String fileName,String hostName,int portNum) throws IOException {
 
         String line;
+
+        System.out.println("Request file to "+hostName);
 
         InetAddress addr = InetAddress.getByName(hostName);
 
@@ -26,7 +29,7 @@ public class fileRequester {
 
         File file = new File(fileName);
 
-        if(file.exists()){
+        if(file.exists()){//create the file
             file.delete();
         }
         else {
@@ -37,10 +40,12 @@ public class fileRequester {
 
         byte[] bytes = new byte[1024];
         int num = 0;
-        while ((num = fromServer.read(bytes,0,bytes.length))!=-1){
+        while ((num = fromServer.read(bytes,0,bytes.length))!=-1){//receive the file and store it
             fileOutputStream.write(bytes,0,num);
             fileOutputStream.flush();
         }
+
+        System.out.println("Transmission Complete!");
 
         sendSocket.close();
     }

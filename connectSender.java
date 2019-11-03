@@ -14,8 +14,6 @@ public class connectSender {
 
         String acHost = peerController.getPeerAddr();
 
-        System.out.println(tempHost);
-
         String message = "{{{requestConnection}}}:("+acHost+","+localPortNum+")\n";
 
         InetAddress addr = InetAddress.getByName(hostName);
@@ -65,7 +63,7 @@ public class connectSender {
 
             for (int j = 0; j< cont; j++){
                 String tempResult = queries(hostList[j],fileName,portList[j],0);
-                if(tempResult!=null){
+                if(tempResult!=null){//do the depth first search, if the first client return the message, break the loop
                     String[] info = tempResult.split(":");
                     String[] tempAddr = info[1].split(";");
                     String[] tempPort = info[2].split(";");
@@ -105,7 +103,9 @@ public class connectSender {
 
         InetAddress addr = InetAddress.getByName(hostName);
 
-        String message = "{{{check}}}:alive\n";
+        String message = "{{{check}}}:"+hostName+"\n";
+
+        System.out.println("Send Heart Beat to "+hostName);
 
         Socket sendSocket = new Socket(addr,portNum);
 

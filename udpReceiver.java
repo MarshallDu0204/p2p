@@ -41,7 +41,7 @@ public class udpReceiver{
 
                 int cont = peerController.getConnNum();
 
-                if(cont>0){
+                if(cont>0){//if the message is ping, flood it to the neighbour with out the sender of the ping
                     String[] hostList = new String[cont];
                     int[] portList = new int[cont];
 
@@ -67,9 +67,7 @@ public class udpReceiver{
 
                 strAddr = temp[1].substring(1,temp[1].length()-1);
 
-                System.out.println("pingAddr"+strAddr);
-
-                uSend.sendMessage(pong,strAddr,portNum);
+                uSend.sendMessage(pong,strAddr,portNum);//send pong message back
 
                 //send pong message back
             }
@@ -87,7 +85,7 @@ public class udpReceiver{
 
                 peerController controller = peerController.getController();
 
-                peerController.addPong(ip,portNumInt);
+                peerController.addPong(ip,portNumInt);//add pong message to the list
             }
         }
 

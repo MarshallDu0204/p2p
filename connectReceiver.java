@@ -36,7 +36,7 @@ public class connectReceiver {
 
             String[] tempMessage = message.split(":");
 
-            if (tempMessage[0].equals("{{{requestConnection}}}")){
+            if (tempMessage[0].equals("{{{requestConnection}}}")){//message type is request connection return the information and add the connect to the peerController
 
                 String[] connInfo = tempMessage[1].split(",");
 
@@ -62,14 +62,19 @@ public class connectReceiver {
                 peerController.addConnect(reqHost,connPort,resPort);
 
                 client.setConnection(reqHost,connPort,resPort);
+
+                System.out.println("Accept Peer Connect "+reqHost);
             }
 
-            else if (tempMessage[0].equals("{{{check}}}")){
+            else if (tempMessage[0].equals("{{{check}}}")){//message type is heart beat
+                System.out.println("Receive Heart Beat from "+tempMessage[1]);
                 message = "alive";
                 toClient.writeBytes(message);
             }
 
-            else{
+            else{//message type is query
+                System.out.println("Receive Query:"+message);
+
                 String[] query = tempMessage[1].split(";");
 
                 InetAddress fileAddr = InetAddress.getLocalHost();
@@ -87,7 +92,7 @@ public class connectReceiver {
 
                 int queryID = Integer.parseInt(strID);
 
-                if(peerController.inQueryList(queryID)){
+                if(peerController.inQueryList(queryID)){//if the query id is in the list, do not flood it forward
                     message = "";
 
                     toClient.writeBytes(message);
@@ -96,11 +101,15 @@ public class connectReceiver {
                     peerController.addQueryNum(queryID);
 
                     if(peerController.existFile(fileName)){
-                        message = "R:"+queryID+";"+acHost+":"+filePort+";"+fileName+"\n";
+                        message = "R:"+queryID+";"+acHost+":"+filePort+";"+fileName+"\n";//send the query back to it's previous holder
 
                         toClient.writeBytes(message);
+
+                        System.out.println("file Exist");
                     }
-                    else{
+                    else{//continue forward the message and wait response
+                        System.out.println("file Not Exist");
+
                         message = "";
 
                         toClient.writeBytes(message);

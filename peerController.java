@@ -1,4 +1,5 @@
 
+
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -32,11 +33,18 @@ public class peerController {
         return false;
     }
 
+    public static void cleanConnection(){//clear all the connection
+        accordance = new int[5];
+        connectedPeer = new Peer[5];
+        pongNum = 0;
+        connectNum = 0;
+    }
+
     public static String getPeerAddr(){
         return peerAddr;
     }
 
-    public static void derivePeerAddr() throws UnknownHostException {
+    public static void derivePeerAddr() throws UnknownHostException {//avoid the getLocalHost== 127.0.0.1 issue
         InetAddress tempAddr = InetAddress.getLocalHost();
         String newAddr = new String(String.valueOf(tempAddr));
         String[] tempStr = newAddr.split("/");
@@ -49,7 +57,7 @@ public class peerController {
         peerAddr = result[1];
     }
 
-    public static void addPong(String hostName, int portNum){
+    public static void addPong(String hostName, int portNum){//add the pong message
         if (!pongExist(hostName,portNum)) {
             if (pongNum < 5) {
                 pongPeer[pongNum] = new Peer(hostName, portNum);
@@ -58,7 +66,7 @@ public class peerController {
         }
     }
 
-    public static Peer[] getPongMsg(){
+    public static Peer[] getPongMsg(){//return the first two of pong message.
         Peer[] peers = new Peer[2];
         if(pongPeer[0]==null){
             return null;
@@ -86,7 +94,7 @@ public class peerController {
         return fPort;
     }
 
-    public static void addConnect(String hostName,int portNum,int selfPort){
+    public static void addConnect(String hostName,int portNum,int selfPort){//if connection is set, add the connection
         if(connectNum<5){
             connectedPeer[connectNum] = new Peer(hostName,portNum);
             localPort[connectNum] = selfPort;
@@ -94,7 +102,7 @@ public class peerController {
         }
     }
 
-    public static void removeConnect(int portNum){
+    public static void removeConnect(int portNum){//if heart beat false, it will remove the connection
         Peer[] temp = new Peer[5];
         int[] newLocalPort = new int[5];
         int k = 0;
@@ -148,13 +156,13 @@ public class peerController {
         InetAddress addr = InetAddress.getLocalHost();
         String strAddr = addr.getHostName();
         String[] tempAddr = strAddr.split("-");
-        String tempHash = tempAddr[1];
+        String tempHash = tempAddr[1];//init the queryID number
 
         idNum = Integer.parseInt(tempHash);
 
         queryID = idNum*100;
 
-        readDir("shared/");
+        readDir("shared/");//read the shared directory to fine all the file
 
         return controller;
     }
@@ -187,7 +195,7 @@ public class peerController {
         return add;
     }
 
-    public static void readDir(String dir){
+    public static void readDir(String dir){//read all the shared file and add the name to the list
         File file = new File(dir);
         File[] tempList = file.listFiles();
 
@@ -201,7 +209,7 @@ public class peerController {
         fileNum = tempList.length;
     }
 
-    public static int getAvaThread(){
+    public static int getAvaThread(){//to get the fist empty thread and return it
         int k = -1;
         for(int i=0;i<5;i++){
             if(accordance[i]==0){
@@ -213,9 +221,9 @@ public class peerController {
 
     public static void addThread(int portNum,int pos){
         accordance[pos] = portNum;
-    }
+    }//tell the thread manager that thread is occupied and record it's information
 
-    public static void removeThread(int portNum){
+    public static void removeThread(int portNum){//if thread is idle, remove it and change the condition to available
         for(int i=0;i<5;i++){
             if(accordance[i]==portNum){
                 accordance[i]=0;
@@ -233,7 +241,7 @@ public class peerController {
         return k;
     }
 
-    public static boolean existFile(String fileName){
+    public static boolean existFile(String fileName){//check whether the file is in the filelist
         boolean exist = false;
         for(int i=0;i<fileNum;i++){
             if (fileList[i].equals(fileName)){

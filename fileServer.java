@@ -21,6 +21,8 @@ public class fileServer {
         while (true){
             Socket recvSocket = welcomeSocket.accept();
 
+            System.out.println("Receive file request");
+
             BufferedReader fromClient = new BufferedReader(new InputStreamReader(recvSocket.getInputStream()));
 
             DataOutputStream toClient = new DataOutputStream(recvSocket.getOutputStream());
@@ -31,7 +33,7 @@ public class fileServer {
 
             String fileName = fileMsg[1];
 
-            fileName = "shared/"+fileName;
+            fileName = "shared/"+fileName;//go to the shared directory read the file and send it back
 
             File file = new File(fileName);
 
@@ -41,7 +43,7 @@ public class fileServer {
 
             FileInputStream fileInputStream = new FileInputStream(file);
 
-            while ((length = fileInputStream.read(bytes,0,bytes.length))!=-1){
+            while ((length = fileInputStream.read(bytes,0,bytes.length))!=-1){//send file back
                 toClient.write(bytes,0,length);
                 toClient.flush();
             }
