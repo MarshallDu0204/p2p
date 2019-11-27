@@ -8,12 +8,44 @@ def readTarget(path):
 		info = f.readlines()
 		return info
 
+def ipMatch(senderIP,recvPacket):
+	match = 1
+	senderIP = senderIP.split(".")
+	recvAddr = []
+	for i in range(12,16):
+		recvAddr.append(ord(recvPacket[i:i+1]))
+	for i in range(0,4):
+		recvAddr[i] = str(recvAddr[i])
+	for i in range(0,4):
+		if senderIP[i]!=recvAddr[i]:
+			match = 0
+			break
 
-def pingHost(hostName):
+	if recvPacket[20]!=3 or recvPacket[21] != 3:
+		match = 0
+
+	return match
+
+def destPortMatch(destPort,recvPacket):
+	packetPort = struct.unpack("!H",recvPacket[50:52])
+	if destPort == packetPort[0] and recvPacket[20]==3 and recvPacket[21] == 3:
+		return 1
+	else:
+		return 0
+
+def checkPayLoad(recvPacket):
+	if len(recvPacket)>56:
+		payloadLength = len(recvPacket)-56
+		return payloadLength
+	else:
+		return 0
+
+
+def measurment(hostName,serverPort,timewait,packetTtl):
 
 	hostAddr = 	socket.gethostbyname(hostName)
 
-	pingAddr = (hostAddr,33434)
+	pingAddr = (hostAddr,serverPort)
 
 	bindAddr = ("",0)
 
@@ -23,55 +55,61 @@ def pingHost(hostName):
 
 	udpSocket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 
-	udpSocket.setsockopt(socket.SOL_SOCKET,socket.IP_TTL,50)
+	udpSocket.setsockopt(socket.IPPROTO_IP,socket.IP_TTL,packetTtl)
 
 	udpSocket.sendto(payload,pingAddr)
 
 	sendTime = time.time()
 
-	print("message send to: ",hostAddr)
-
 	icmpSocket = socket.socket(socket.AF_INET,socket.SOCK_RAW,socket.IPPROTO_ICMP)
 
-	timeout = struct.pack("ll", 5000, 0)
+	timeout = struct.pack("ll", timewait, 0)
 
 	icmpSocket.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, timeout)
 
 	icmpSocket.bind(bindAddr)
 
-	print("recvSocket is ready!")
+	try:
+		icmp_packet,recvAddr = icmpSocket.recvfrom(1600)
 
-	icmp_packet,recvAddr = icmpSocket.recvfrom(1600)
+	except:
+
+		return [-1]
 
 	recvTime = time.time()
 
 	rttTime = recvTime-sendTime
 
-	print(icmp_packet)
+	actTTL = icmp_packet[36]
 
-	print("RTT is ",rttTime)
+	hostNum = packetTtl-actTTL
 
 	udpSocket.close()
 
 	icmpSocket.close()
 
-	print(recvAddr,len(icmp_packet))
+	result0 = ipMatch(hostAddr,icmp_packet)
 
-	info = struct.unpack("!H",icmp_packet[10:12])[0]
+	result1 = destPortMatch(serverPort,icmp_packet)
 
-	print(info)
+	payloadLength = checkPayLoad(icmp_packet)
 
-	'''
-
-	icmp_packet = struct.unpack("ii",icmp_packet)
-
-	print(icmp_packet)
-
-	icmp_packet.decode('ascii')
-
-	print(icmp_packet)
-	'''
-
-pingHost("www.google.com")
+	return [hostName,hostAddr,hostNum,rttTime,result0,result1,payloadLength]
 
 
+def main():
+	packetTtl = 255
+	serverPort = 33434
+	timewait = 3
+
+	addrList = readTarget("target.txt")
+	for host in addrList:
+		host = host.strip()
+		result = measurment(host,serverPort,timewait,packetTtl)
+		if len(result)==1:
+			print(host," server doesn't reply")
+		else:
+			print(result)
+
+if __name__ == '__main__':
+	main()
