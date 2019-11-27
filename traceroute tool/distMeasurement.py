@@ -41,7 +41,7 @@ def checkPayLoad(recvPacket):
 		return 0
 
 
-def measurment(hostName,serverPort,timewait,packetTtl):
+def measurement(hostName,serverPort,timewait,packetTtl):
 
 	hostAddr = 	socket.gethostbyname(hostName)
 
@@ -96,6 +96,24 @@ def measurment(hostName,serverPort,timewait,packetTtl):
 
 	return [hostName,hostAddr,hostNum,rttTime,result0,result1,payloadLength]
 
+def showResult(result):
+	solu = ""
+	solu = "Hostname: "+result[0]+" |"
+	solu = solu+"Ip address: "+result[1]+" |"
+	solu = solu+"Number of host: "+str(result[2])+" |"
+	solu = solu+"rtt time is: "+str(result[3])+" |"
+	ipResult = "Not match"
+	if result[4]==1:
+		ipResult = "Match"
+	solu = solu+"ip match result: "+ipResult+" |"
+	portResult = "Not match"
+	if result[5]==1:
+		portResult = "Match"
+	solu = solu+"port match result: "+portResult+" |"
+	solu = solu+"reply payload length: "+str(result[6])
+	print(solu)
+	print("-----------------")
+
 
 def main():
 	packetTtl = 255
@@ -105,11 +123,11 @@ def main():
 	addrList = readTarget("target.txt")
 	for host in addrList:
 		host = host.strip()
-		result = measurment(host,serverPort,timewait,packetTtl)
+		result = measurement(host,serverPort,timewait,packetTtl)
 		if len(result)==1:
 			print(host," server doesn't reply")
 		else:
-			print(result)
+			showResult(result)
 
 if __name__ == '__main__':
 	main()
